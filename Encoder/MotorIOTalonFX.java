@@ -1,4 +1,4 @@
-/*package frc.robot.subsystems.wrists;
+package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
@@ -20,7 +20,7 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Voltage;
-*/
+
 public class MotorIOTalonFX implements MotorIO {
     private final TalonFX motor;
     private final PositionVoltage motorController;
