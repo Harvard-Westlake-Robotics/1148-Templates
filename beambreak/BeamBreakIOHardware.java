@@ -11,7 +11,7 @@ public class BeamBreakIOHardware implements BeamBreakIO {
 
     @Override
     public void updateInputs(BeamBreakIOInputs inputs) {
-        inputs.value = getBeamBreak();
+        inputs.isBroken = getBeamBreak();
     }
 
     public Boolean getBeamBreak() {
