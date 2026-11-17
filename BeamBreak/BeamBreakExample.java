@@ -4,8 +4,10 @@
 public class BeamBreakExample {
     private final DigitalInput beamBreak;
 
-    this.beamBreak = new DigitalInput(1); // input id here
-
+    public BeamBreakExample() {
+        this.beamBreak = new DigitalInput(1); // input id here
+    }
+    
     public Boolean getBeamBreak() {
         if (beamBreak != null) {
             return beamBreak.get();
@@ -14,7 +16,7 @@ public class BeamBreakExample {
         }
     }
 
-    public int getBeamBreaKPort() {
+    public int getBeamBreakPort() {
         if (beamBreak != null) {
             return beamBreak.getChannel();
         } else {
