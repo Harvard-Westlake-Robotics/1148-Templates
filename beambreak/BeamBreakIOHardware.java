@@ -14,11 +14,7 @@ public class BeamBreakIOHardware implements BeamBreakIO {
         inputs.isBroken = getBeamBreak();
     }
 
-    public Boolean getBeamBreak() {
-        if (beamBreak != null) {
-            return beamBreak.get();
-        } else {
-            return null;
-        }
+    public boolean getBeamBreak() {
+        return beamBreak.get();
     }
 }
