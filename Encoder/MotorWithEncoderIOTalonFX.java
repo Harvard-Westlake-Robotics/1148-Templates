@@ -21,7 +21,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Voltage;
 
-public class MotorIOTalonFX implements MotorIO {
+public class MotorWithEncoderIOTalonFX implements MotorWithEncoderIO {
     private final TalonFX motor;
     private final PositionVoltage motorController;
 
@@ -37,13 +37,26 @@ public class MotorIOTalonFX implements MotorIO {
     private final Debouncer motorConnectedDebouncer = new Debouncer(0.5);
     private final Debouncer encoderConnectedDebouncer = new Debouncer(0.5);
 
-    public MotorIOTalonFX(int motorID, int encoderID) {
-        motor = new TalonFX(motorID, new CANBus("subsystems"));
+    public MotorWithEncoderIOTalonFX(int motorID, int encoderID) {
+
+        encoder = new CANcoder(encoderID, new CANBus(CANPort.CAN_S2));
+
+        encoderConfig = new CANcoderConfiguration();
+        
+        encoderConfig.MagnetSensor.SensorDirection = motorConstants.encoderSensorDirection;
+        encoderConfig.MagnetSensor.MagnetOffset = motorConstants.encoderOffset;
+
+        encoder.getConfigurator().apply(encoderConfig);
+
+        motor = new TalonFX(motorID, new CANBus(CANPort.CAN_S2));
         motorController = new PositionVoltage(motorConstants.stowedPositionRotations).withEnableFOC(true);
         motorConfig = new TalonFXConfiguration();
 
         motorConfig.MotorOutput.Inverted = motorConstants.motorInverted;
         motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+
+        motorConfig.CurrentLimits.StatorCurrentLimitEnable = true; 
+        motorConfig.CurrentLimits.SupplyCurrentLimitEnable = true; 
 
         motorConfig.CurrentLimits.StatorCurrentLimit = motorConstants.statorLimit;
         motorConfig.CurrentLimits.SupplyCurrentLimit = motorConstants.supplyLimit;
@@ -62,21 +75,14 @@ public class MotorIOTalonFX implements MotorIO {
 
         motorConfig.Feedback.FeedbackRemoteSensorID = encoderID;
         motorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
+
+        // Number of motor rotations per one CANcoder rotation
         motorConfig.Feedback.RotorToSensorRatio = motorConstants.motorRotationsPerSensorRotationRatio;
+        // Number of CANcoder rotations per one motor rotation
         motorConfig.Feedback.SensorToMechanismRatio = motorConstants.sensorRotationsPerWristRotationRatio;
 
         motor.getConfigurator().apply(motorConfig);
         motor.setControl(motorController);
-
-        encoder = new CANcoder(encoderID, new CANBus("subsystems"));
-
-        encoderConfig = new CANcoderConfiguration();
-        
-        // Change these values in the constants file for encoder dir and offset
-        encoderConfig.MagnetSensor.SensorDirection = motorConstants.encoderSensorDirection;
-        encoderConfig.MagnetSensor.MagnetOffset = motorConstants.encoderOffset;
-
-        encoder.getConfigurator().apply(encoderConfig);
 
         motorPosition = motor.getPosition();
         motorVelocity = motor.getVelocity();
@@ -84,9 +90,13 @@ public class MotorIOTalonFX implements MotorIO {
     }
 
     @Override
-    public void updateInputs(MotorIOInputs inputs) {
-        StatusSignal.refreshAll(motorPosition, motorVelocity, motorAppliedVoltage);
-
+    public void updateInputs(MotorWithEncoderIOInputs inputs) {
+            if ((inputs.motorConnected = motorConnectedDebouncer.calculate(motor.isConnected()))) {
+                StatusSignal.refreshAll(
+                    motorPosition,
+                    motorVelocity,      
+                    motorAppliedVoltage);
+            }
         inputs.motorConnected = motorConnectedDebouncer.calculate(motor.isConnected());
         inputs.encoderConnected = encoderConnectedDebouncer.calculate(encoder.isConnected());
         inputs.motorPositionRot = motorPosition.getValue().in(Rotations);

@@ -2,17 +2,20 @@ package frc.robot.subsystems;
 
 import org.littletonrobotics.junction.AutoLog;
 
-public interface MotorIO {
+public interface MotorWithEncoderIO {
     @AutoLog
-    public static class MotorIOInputs {
+    public static class MotorWithEncoderIOInputs {
         public boolean motorConnected = false;
         public boolean encoderConnected = false;
         public double motorPositionRot = 0.0;
         public double motorVelocityRPS = 0.0;
         public double motorAppliedVolts = 0.0;
+        public double statorCurrentAmps = 0.0;
+        public double supplyCurrentAmps = 0.0;
+
     }
  
-    public default void updateInputs(MotorIOInputs inputs) {
+    public default void updateInputs(MotorWithEncoderIOInputs inputs) {
     }
 
     public default void runVoltage(double volts) {
