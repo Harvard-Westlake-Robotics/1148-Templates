@@ -20,6 +20,8 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.units.measure.Current;
+import static edu.wpi.first.units.Units.Amps;
 
 public class MotorWithEncoderIOTalonFX implements MotorWithEncoderIO {
     private final TalonFX motor;
@@ -33,6 +35,8 @@ public class MotorWithEncoderIOTalonFX implements MotorWithEncoderIO {
     private final StatusSignal<Angle> motorPosition;
     private final StatusSignal<AngularVelocity> motorVelocity;
     private final StatusSignal<Voltage> motorAppliedVoltage;
+    private final StatusSignal<Current> motorStatorCurrentAmps;
+    private final StatusSignal<Current> motorSupplyCurrentAmps;
 
     private final Debouncer motorConnectedDebouncer = new Debouncer(0.5);
     private final Debouncer encoderConnectedDebouncer = new Debouncer(0.5);
@@ -76,10 +80,8 @@ public class MotorWithEncoderIOTalonFX implements MotorWithEncoderIO {
         motorConfig.Feedback.FeedbackRemoteSensorID = encoderID;
         motorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
 
-        // Number of motor rotations per one CANcoder rotation
         motorConfig.Feedback.RotorToSensorRatio = motorConstants.motorRotationsPerSensorRotationRatio;
-        // Number of CANcoder rotations per one motor rotation
-        motorConfig.Feedback.SensorToMechanismRatio = motorConstants.sensorRotationsPerWristRotationRatio;
+        motorConfig.Feedback.SensorToMechanismRatio = motorConstants.sensorRotationsPerMechanismRotationRatio;
 
         motor.getConfigurator().apply(motorConfig);
         motor.setControl(motorController);
@@ -87,21 +89,27 @@ public class MotorWithEncoderIOTalonFX implements MotorWithEncoderIO {
         motorPosition = motor.getPosition();
         motorVelocity = motor.getVelocity();
         motorAppliedVoltage = motor.getMotorVoltage();
+        motorStatorCurrentAmps = motor.getStatorCurrent();
+        motorSupplyCurrentAmps = motor.getSupplyCurrent();
     }
 
     @Override
     public void updateInputs(MotorWithEncoderIOInputs inputs) {
-            if ((inputs.motorConnected = motorConnectedDebouncer.calculate(motor.isConnected()))) {
-                StatusSignal.refreshAll(
-                    motorPosition,
-                    motorVelocity,      
-                    motorAppliedVoltage);
-            }
         inputs.motorConnected = motorConnectedDebouncer.calculate(motor.isConnected());
-        inputs.encoderConnected = encoderConnectedDebouncer.calculate(encoder.isConnected());
+        if (inputs.motorConnected) {
+            StatusSignal.refreshAll(
+                motorPosition,
+                motorVelocity,
+                motorAppliedVoltage,
+                motorStatorCurrentAmps,
+                motorSupplyCurrentAmps);
+        }
+
         inputs.motorPositionRot = motorPosition.getValue().in(Rotations);
         inputs.motorVelocityRPS = motorVelocity.getValue().in(RotationsPerSecond);
         inputs.motorAppliedVolts = motorAppliedVoltage.getValue().in(Volts);
+        inputs.motorStatorCurrentAmps = motorStatorCurrentAmps.getValue().in(Amps);
+        inputs.motorSupplyCurrentAmps = motorSupplyCurrentAmps.getValue().in(Amps);
     }
 
     @Override
