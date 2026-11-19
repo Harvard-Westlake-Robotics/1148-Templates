@@ -96,6 +96,7 @@ public class MotorWithEncoderIOTalonFX implements MotorWithEncoderIO {
     @Override
     public void updateInputs(MotorWithEncoderIOInputs inputs) {
         inputs.motorConnected = motorConnectedDebouncer.calculate(motor.isConnected());
+        inputs.encoderConnected = encoderConnectedDebouncer.calculate(encoder.isConnected());
         if (inputs.motorConnected) {
             StatusSignal.refreshAll(
                 motorPosition,
