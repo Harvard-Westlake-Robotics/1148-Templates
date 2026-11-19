@@ -1,6 +1,6 @@
-package limit_switch;
+package LimitSwitch;
 
-import edu.wpi.first.wpilibj.DigitalInput;
+import org.wpilib.hardware.discrete.DigitalInput;
 
 public class LimitSwitchIOREV implements LimitSwitchIO {
   private final DigitalInput limitSwitch;
@@ -10,10 +10,6 @@ public class LimitSwitchIOREV implements LimitSwitchIO {
   public LimitSwitchIOREV(int channel) {
     this.limitSwitch = new DigitalInput(channel);
     isPressed = limitSwitch.get();
-  }
-
-  public int getChannel() {
-    return limitSwitch.getChannel();
   }
 
   @Override

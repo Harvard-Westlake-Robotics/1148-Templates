@@ -1,12 +1,11 @@
-package limit_switch;
+package LimitSwitch;
 
 import org.littletonrobotics.junction.AutoLog;
-import edu.wpi.first.wpilibj.DigitalInput;
 
 public interface LimitSwitchIO {
   @AutoLog
   public static class LimitSwitchIOInputs {
-    public bool isPressed = false;
+    public boolean isPressed = false;
   }
 
   public default void updateInputs(LimitSwitchIOInputs inputs) {}
